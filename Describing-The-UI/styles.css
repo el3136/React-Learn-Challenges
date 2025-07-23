@@ -1,0 +1,76 @@
+* {
+  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+.todo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  height: 100vh;
+  margin: 20px;
+  padding: 20px;
+  border: 3px solid black;
+  border-radius: 12px;
+}
+
+.todo-form {
+  width: 100%;
+}
+
+.add-task-input {
+  padding: 10px;
+  margin: 10px 0;
+  width: 100%;
+  border: 1px solid #d6d6d6;
+  border-radius: 5px;
+  background-color: lightgray;
+}
+
+.add-task-button {
+  background-color: #0044ff;
+  color: white;
+  margin: 10px;
+}
+
+.todo-task-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+  margin: 10px 0;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.task-text {
+  flex-grow: 1;
+}
+
+.remove-task-button {
+  margin-left: auto;
+  background: none; /* makes background invisible */
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: grey; /* makes the "x" text grey */
+}
+
+.input-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.deleted-task {
+  color: grey;
+}
+
+/* Not yet modified */
+.todo-checkbox {
+  border-radius: 12px;       /* Makes it round */
+  background-color: orange; /* makes the background orange */
+}
+
+
