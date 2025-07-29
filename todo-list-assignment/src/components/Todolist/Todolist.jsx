@@ -12,7 +12,7 @@ const Todolist = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         if (!inputValue.trim()) return;
-        const newTodoItem = { id: uuidv4(), title: inputValue, done: false };
+        const newTodoItem = { id: uuidv4(), title: inputValue, done: false, edit: false, editingTitle: inputValue };
         setTodolist([...todolist, newTodoItem]);
         setInputValue("");
     };
@@ -27,6 +27,36 @@ const Todolist = () => {
     const handleDelete = (id) => {
         const filtered = todolist.filter((item) => item.id !== id);
         setTodolist(filtered);
+    };
+
+    const handleEdit = (id) => {
+        // find the edited todo and turn the field into an <input>
+        const updated = todolist.map((item) =>
+            item.id === id ? { ...item, edit: !item.edit, editingTitle: item.title } : item
+        );
+        setTodolist(updated);
+    };
+
+    const handleEditChange = (id, value) => {
+        const updated = todolist.map((item) =>
+            item.id === id ? { ...item, editingTitle: value } : item
+        );
+        setTodolist(updated);
+    };
+
+    const handleSave = (id) => {
+        // find the edited todo and turn the <input> back to normal text
+        const updated = todolist.map((item) =>
+            item.id === id ? { ...item, edit: !item.edit, title: item.editingTitle } : item
+        );
+        setTodolist(updated);
+    };
+
+    const handleCancel = (id) => {
+        const updated = todolist.map((item) =>
+            item.id === id ? { ...item, edit: !item.edit, editingTitle: item.title } : item
+        );
+        setTodolist(updated);
     };
 
     return (
@@ -54,19 +84,52 @@ const Todolist = () => {
                             onChange={() => handleToggle(item.id)}
                         />
                         <span className="task-text">
-                            {item.done ? (
+                            {(item.edit) ? (
+                                <input 
+                                    value={item.editingTitle} 
+                                    onChange={(e) => handleEditChange(item.id, e.target.value)}
+                                />
+                            ): (item.done && !item.edit) ? (
                                 <del className="deleted-task">{item.title}</del>
                             ) : (
-                                item.title
+                                <span>{item.title}</span>
                             )}
                         </span>
-                        <button
-                            type="button"
-                            className="remove-task-button"
-                            onClick={() => handleDelete(item.id)}
-                        >
-                            x
-                        </button>
+                        {item.edit ? (
+                            <>
+                                <button
+                                    type="button"
+                                    className="edit-task-button"
+                                    onClick={() => handleSave(item.id)}
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    type="button"
+                                    className="remove-task-button"
+                                    onClick={() => handleCancel(item.id)}
+                                >
+                                    x
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    className="edit-task-button"
+                                    onClick={() => handleEdit(item.id)}
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    className="remove-task-button"
+                                    onClick={() => handleDelete(item.id)}
+                                >
+                                    x
+                                </button>
+                            </>
+                        )}
                     </label>
                 ))}
             </div>

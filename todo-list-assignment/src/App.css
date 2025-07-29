@@ -78,6 +78,14 @@
   color: grey; /* makes the "x" text grey */
 }
 
+.edit-task-button {
+  margin-left: auto;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: grey; /* makes the "x" text grey */
+}
+
 .input-row {
   display: flex;
   gap: 20px;
