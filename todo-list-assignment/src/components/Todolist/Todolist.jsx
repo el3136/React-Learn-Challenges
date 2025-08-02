@@ -1,139 +1,184 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const Todolist = () => {
     const [inputValue, setInputValue] = useState("");
     const [todolist, setTodolist] = useState([]);
 
-    const handleChange = (event) => {
-        setInputValue(event.target.value);
-    };
+    const inputRef = useRef(null);
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
+    useEffect(() => {
+        // focus on inputRef after "Add" task is completed
+        if (inputValue === "") {
+            inputRef.current?.focus();
+        }
+    }, [inputValue]);
+
+    const handleChange = useCallback((e) => {
+        setInputValue(e.target.value);
+    }, []);
+
+    const handleSubmit = useCallback((e) => {
+        e.preventDefault();
+        
         if (!inputValue.trim()) return;
-        const newTodoItem = { id: uuidv4(), title: inputValue, done: false, edit: false, editingTitle: inputValue };
-        setTodolist([...todolist, newTodoItem]);
+        const newTodo = {
+            id: uuidv4(),
+            title: inputValue,
+            done: false,
+            edit: false,
+            editingTitle: inputValue,
+        };
+        setTodolist((prev) => [...prev, newTodo]);
         setInputValue("");
-    };
+    }, [inputValue]);
 
-    const handleToggle = (id) => {
-        const updated = todolist.map((item) =>
-            item.id === id ? { ...item, done: !item.done } : item
+    const handleDelete = useCallback((id) => {
+        setTodolist((prev) => prev.filter((item) => item.id !== id));
+    }, []);
+
+    const handleToggle = useCallback((id) => {
+        setTodolist((prev) =>
+            prev.map((item) =>
+                item.id === id ? { ...item, done: !item.done } : item
+            )
         );
-        setTodolist(updated);
-    };
+    }, []);
 
-    const handleDelete = (id) => {
-        const filtered = todolist.filter((item) => item.id !== id);
-        setTodolist(filtered);
-    };
-
-    const handleEdit = (id) => {
-        // find the edited todo and turn the field into an <input>
-        const updated = todolist.map((item) =>
-            item.id === id ? { ...item, edit: !item.edit, editingTitle: item.title } : item
+    const handleEdit = useCallback((id) => {
+        setTodolist((prev) =>
+            prev.map((item) =>
+                item.id === id
+                    ? { ...item, edit: !item.edit, editingTitle: item.title }
+                    : item
+            )
         );
-        setTodolist(updated);
-    };
+    }, []);
 
-    const handleEditChange = (id, value) => {
-        const updated = todolist.map((item) =>
-            item.id === id ? { ...item, editingTitle: value } : item
+    const handleEditChange = useCallback((id, value) => {
+        setTodolist((prev) =>
+            prev.map((item) =>
+                item.id === id ? { ...item, editingTitle: value } : item
+            )
         );
-        setTodolist(updated);
-    };
+    }, []);
 
-    const handleSave = (id) => {
-        // find the edited todo and turn the <input> back to normal text
-        const updated = todolist.map((item) =>
-            item.id === id ? { ...item, edit: !item.edit, title: item.editingTitle } : item
+    const handleSave = useCallback((id) => {
+        setTodolist((prev) =>
+            prev.map((item) =>
+                item.id === id 
+                    ? {
+                        ...item,
+                        edit: false,
+                        title: item.editingTitle,
+                    } : item
+            )
         );
-        setTodolist(updated);
-    };
+    }, []);
 
-    const handleCancel = (id) => {
-        const updated = todolist.map((item) =>
-            item.id === id ? { ...item, edit: !item.edit, editingTitle: item.title } : item
+    const handleCancel = useCallback((id) => {
+        setTodolist((prev) =>
+            prev.map((item) =>
+                item.id === id
+                    ? { ...item, edit: false, editingTitle: item.title }
+                    : item
+            )
         );
-        setTodolist(updated);
-    };
+    }, []);
+
+    const pendingTodos = useMemo(() => todolist.filter((item) => !item.done), [todolist]);
+    const completedTodos = useMemo(() => todolist.filter((item) => item.done), [todolist]);
+
+    const renderTodoItem = (item) => (
+        <label className="todo-task-row" key={item.id}>
+            <span className="task-text">
+                {item.edit ? (
+                    <input
+                        value={item.editingTitle}
+                        onChange={(e) => handleEditChange(item.id, e.target.value)}
+                    />
+                ) : item.done ? (
+                    <del className="deleted-task">{item.title}</del>
+                ) : (
+                    <span>{item.title}</span>
+                )}
+            </span>
+
+            {item.edit ? (
+                <>
+                    <button
+                        type="button"
+                        className="edit-task-button"
+                        onClick={() => handleSave(item.id)}
+                    >
+                        Save
+                    </button>
+                    <button
+                        type="button"
+                        className="remove-task-button"
+                        onClick={() => handleCancel(item.id)}
+                    >
+                        x
+                    </button>
+                </>
+            ) : (
+                <>
+                    <button
+                        type="button"
+                        className="edit-task-button"
+                        onClick={() => handleEdit(item.id)}
+                    >
+                        Edit
+                    </button>
+                    <button
+                        type="button"
+                        className="remove-task-button"
+                        onClick={() => handleDelete(item.id)}
+                    >
+                        x
+                    </button>
+                    <button
+                        type="button"
+                        className="toggle-task-button"
+                        onClick={() => handleToggle(item.id)}
+                    >
+                        {item.done ? "<=" : "=>"}
+                    </button>
+                </>
+            )}
+        </label>
+    );
 
     return (
-        <form className="todo-form" onSubmit={handleSubmit}>
-            <div className="input-row">
-                <input
-                    type="text"
-                    placeholder="Add your Task"
-                    className="add-task-input"
-                    value={inputValue}
-                    onChange={handleChange}
-                />
-                <button type="submit" className="add-task-button">
-                    Add
-                </button>
-            </div>
+        <div>
+            <form className="todo-form" onSubmit={handleSubmit}>
+                <div className="input-row">
+                    <input
+                        type="text"
+                        placeholder="Add your Task"
+                        className="add-task-input"
+                        value={inputValue}
+                        onChange={handleChange}
+                        ref={inputRef}
+                    />
+                    <button type="submit" className="add-task-button">
+                        Add
+                    </button>
+                </div>
+            </form>
 
-            <div className="todo-task-list">
-                {todolist.map((item) => (
-                    <label className="todo-task-row" key={item.id}>
-                        <input
-                            type="checkbox"
-                            className="todo-checkbox"
-                            checked={item.done}
-                            onChange={() => handleToggle(item.id)}
-                        />
-                        <span className="task-text">
-                            {(item.edit) ? (
-                                <input 
-                                    value={item.editingTitle} 
-                                    onChange={(e) => handleEditChange(item.id, e.target.value)}
-                                />
-                            ): (item.done && !item.edit) ? (
-                                <del className="deleted-task">{item.title}</del>
-                            ) : (
-                                <span>{item.title}</span>
-                            )}
-                        </span>
-                        {item.edit ? (
-                            <>
-                                <button
-                                    type="button"
-                                    className="edit-task-button"
-                                    onClick={() => handleSave(item.id)}
-                                >
-                                    Save
-                                </button>
-                                <button
-                                    type="button"
-                                    className="remove-task-button"
-                                    onClick={() => handleCancel(item.id)}
-                                >
-                                    x
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    type="button"
-                                    className="edit-task-button"
-                                    onClick={() => handleEdit(item.id)}
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    type="button"
-                                    className="remove-task-button"
-                                    onClick={() => handleDelete(item.id)}
-                                >
-                                    x
-                                </button>
-                            </>
-                        )}
-                    </label>
-                ))}
+            <div className="todo-task-section">
+                <h3>Pending Tasks</h3>
+                <div className="todo-task-list">
+                    {pendingTodos.map(renderTodoItem)}
+                </div>
+
+                <h3>Completed Tasks</h3>
+                <div className="todo-task-list">
+                    {completedTodos.map(renderTodoItem)}
+                </div>
             </div>
-        </form>
+        </div>
     );
 };
 
