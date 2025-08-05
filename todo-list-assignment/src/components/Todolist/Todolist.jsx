@@ -1,185 +1,87 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { v4 as uuidv4 } from "uuid";
+import React, { useEffect, useMemo, useRef } from "react";
+import { useTodo } from "../../context/TodoContext";
 
 const Todolist = () => {
-    const [inputValue, setInputValue] = useState("");
-    const [todolist, setTodolist] = useState([]);
+  const { state, dispatch } = useTodo();
+  const { todos, inputValue } = state;
 
-    const inputRef = useRef(null);
+  const inputRef = useRef(null);
 
-    useEffect(() => {
-        // focus on inputRef after "Add" task is completed
-        if (inputValue === "") {
-            inputRef.current?.focus();
-        }
-    }, [inputValue]);
+  useEffect(() => {
+    if (inputValue === "") {
+      inputRef.current?.focus();
+    }
+  }, [inputValue]);
 
-    const handleChange = useCallback((e) => {
-        setInputValue(e.target.value);
-    }, []);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch({ type: "ADD_TODO" });
+  };
 
-    const handleSubmit = useCallback((e) => {
-        e.preventDefault();
-        
-        if (!inputValue.trim()) return;
-        const newTodo = {
-            id: uuidv4(),
-            title: inputValue,
-            done: false,
-            edit: false,
-            editingTitle: inputValue,
-        };
-        setTodolist((prev) => [...prev, newTodo]);
-        setInputValue("");
-    }, [inputValue]);
+  const pendingTodos = useMemo(() => todos.filter(todo => !todo.done), [todos]);
+  const completedTodos = useMemo(() => todos.filter(todo => todo.done), [todos]);
 
-    const handleDelete = useCallback((id) => {
-        setTodolist((prev) => prev.filter((item) => item.id !== id));
-    }, []);
+  const renderTodoItem = (item) => (
+    <label className="todo-task-row" key={item.id}>
+      <span className="task-text">
+        {item.edit ? (
+          <input
+            value={item.editingTitle}
+            onChange={(e) =>
+              dispatch({ type: "CHANGE_EDIT_TITLE", payload: { id: item.id, value: e.target.value } })
+            }
+          />
+        ) : item.done ? (
+          <del className="deleted-task">{item.title}</del>
+        ) : (
+          <span>{item.title}</span>
+        )}
+      </span>
 
-    const handleToggle = useCallback((id) => {
-        setTodolist((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, done: !item.done } : item
-            )
-        );
-    }, []);
+      {item.edit ? (
+        <>
+          <button onClick={() => dispatch({ type: "SAVE_TODO", payload: item.id })}>Save</button>
+          <button onClick={() => dispatch({ type: "CANCEL_EDIT", payload: item.id })}>x</button>
+        </>
+      ) : (
+        <>
+          <button onClick={() => dispatch({ type: "EDIT_TODO", payload: item.id })}>Edit</button>
+          <button onClick={() => dispatch({ type: "DELETE_TODO", payload: item.id })}>x</button>
+          <button onClick={() => dispatch({ type: "TOGGLE_TODO", payload: item.id })}>
+            {item.done ? "<=" : "=>"}
+          </button>
+        </>
+      )}
+    </label>
+  );
 
-    const handleEdit = useCallback((id) => {
-        setTodolist((prev) =>
-            prev.map((item) =>
-                item.id === id
-                    ? { ...item, edit: !item.edit, editingTitle: item.title }
-                    : item
-            )
-        );
-    }, []);
-
-    const handleEditChange = useCallback((id, value) => {
-        setTodolist((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, editingTitle: value } : item
-            )
-        );
-    }, []);
-
-    const handleSave = useCallback((id) => {
-        setTodolist((prev) =>
-            prev.map((item) =>
-                item.id === id 
-                    ? {
-                        ...item,
-                        edit: false,
-                        title: item.editingTitle,
-                    } : item
-            )
-        );
-    }, []);
-
-    const handleCancel = useCallback((id) => {
-        setTodolist((prev) =>
-            prev.map((item) =>
-                item.id === id
-                    ? { ...item, edit: false, editingTitle: item.title }
-                    : item
-            )
-        );
-    }, []);
-
-    const pendingTodos = useMemo(() => todolist.filter((item) => !item.done), [todolist]);
-    const completedTodos = useMemo(() => todolist.filter((item) => item.done), [todolist]);
-
-    const renderTodoItem = (item) => (
-        <label className="todo-task-row" key={item.id}>
-            <span className="task-text">
-                {item.edit ? (
-                    <input
-                        value={item.editingTitle}
-                        onChange={(e) => handleEditChange(item.id, e.target.value)}
-                    />
-                ) : item.done ? (
-                    <del className="deleted-task">{item.title}</del>
-                ) : (
-                    <span>{item.title}</span>
-                )}
-            </span>
-
-            {item.edit ? (
-                <>
-                    <button
-                        type="button"
-                        className="edit-task-button"
-                        onClick={() => handleSave(item.id)}
-                    >
-                        Save
-                    </button>
-                    <button
-                        type="button"
-                        className="remove-task-button"
-                        onClick={() => handleCancel(item.id)}
-                    >
-                        x
-                    </button>
-                </>
-            ) : (
-                <>
-                    <button
-                        type="button"
-                        className="edit-task-button"
-                        onClick={() => handleEdit(item.id)}
-                    >
-                        Edit
-                    </button>
-                    <button
-                        type="button"
-                        className="remove-task-button"
-                        onClick={() => handleDelete(item.id)}
-                    >
-                        x
-                    </button>
-                    <button
-                        type="button"
-                        className="toggle-task-button"
-                        onClick={() => handleToggle(item.id)}
-                    >
-                        {item.done ? "<=" : "=>"}
-                    </button>
-                </>
-            )}
-        </label>
-    );
-
-    return (
-        <div>
-            <form className="todo-form" onSubmit={handleSubmit}>
-                <div className="input-row">
-                    <input
-                        type="text"
-                        placeholder="Add your Task"
-                        className="add-task-input"
-                        value={inputValue}
-                        onChange={handleChange}
-                        ref={inputRef}
-                    />
-                    <button type="submit" className="add-task-button">
-                        Add
-                    </button>
-                </div>
-            </form>
-
-            <div className="todo-task-section">
-                <h3>Pending Tasks</h3>
-                <div className="todo-task-list">
-                    {pendingTodos.map(renderTodoItem)}
-                </div>
-
-                <h3>Completed Tasks</h3>
-                <div className="todo-task-list">
-                    {completedTodos.map(renderTodoItem)}
-                </div>
-            </div>
+  return (
+    <div>
+      <form className="todo-form" onSubmit={handleSubmit}>
+        <div className="input-row">
+          <input
+            type="text"
+            placeholder="Add your Task"
+            className="add-task-input"
+            value={inputValue}
+            onChange={(e) =>
+              dispatch({ type: "SET_INPUT", payload: e.target.value })
+            }
+            ref={inputRef}
+          />
+          <button type="submit" className="add-task-button">Add</button>
         </div>
-    );
+      </form>
+
+      <div className="todo-task-section">
+        <h3>Pending Tasks</h3>
+        <div className="todo-task-list">{pendingTodos.map(renderTodoItem)}</div>
+
+        <h3>Completed Tasks</h3>
+        <div className="todo-task-list">{completedTodos.map(renderTodoItem)}</div>
+      </div>
+    </div>
+  );
 };
 
 export default Todolist;
