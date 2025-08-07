@@ -89,6 +89,8 @@ function todoReducer(state, action) {
 
 export default function TodoProvider({ children }) {
   const [state, dispatch] = useReducer(todoReducer, initialState);
+  // ".Provider" allows any descendant component within its tree
+  //  to consume the data (value) stored in the context.
   return (
     <TodoContext.Provider value={{ state, dispatch }}>
       {children}

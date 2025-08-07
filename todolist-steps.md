@@ -22,3 +22,37 @@ createRoot(document.getElementById('root')).render(
     <App />
   </TodoProvider>,
 )
+
+## Homework: refactor your functional todolist app to use redux core
+Define a reducer to handle state logic for the todo list
+For “add todo” action: Apply a middleware to modify the title to be this specific format: { title: "Added at 2025-08-01: Buy groceries" }
+Apply a store enhancer to log the time it takes to process actions in the reducer
+
+- Redux Core
+npm install react-redux redux
+
+- new files:
+/src/store/store.js
+/src/hooks/hooks.js
+
+- modified:
+/src/components/Todolist.jsx
+import { useTodos, useInputValue, useTodoDispatch} from "../hooks/hooks";
+
+const Todolist = () => {
+  const todos = useTodos();
+  const inputValue = useInputValue();
+  const dispatch = useTodoDispatch();
+}
+
+/src/App.jsx
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import Todolist from "./components/Todolist";
+export default function App() {
+  return (
+    <Provider store={store}>
+      <Todolist />
+    </Provider>
+  );
+}

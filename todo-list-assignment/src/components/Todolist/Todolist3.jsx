@@ -1,19 +1,15 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { useTodos, useInputValue, useTodoDispatch } from '../../hooks/hooks';
+import { useTodo } from "../../context/TodoContext";
 
-// Homework: refactor your functional todolist app to use redux core
-// Define a reducer to handle state logic for the todo list
-// For “add todo” action: Apply a middleware to modify the title to be this specific format: { title: "Added at 2025-08-01: Buy groceries" }
-// Apply a store enhancer to log the time it takes to process actions in the reducer
-
-// /src/store/store.js
-// /src/hooks/hooks.js
-// /src.App.jsx
+// Homework: Refactor your functional component todolist.
+// Use context to manage all the states, and use reducer to handle todo
+//   data related updates (put useReducer in context).
+// Read the documentation about context and reducer
+// https://react.dev/learn/passing-data-deeply-with-context
 
 const Todolist = () => {
-  const todos = useTodos();
-  const inputValue = useInputValue();
-  const dispatch = useTodoDispatch();
+  const { state, dispatch } = useTodo();
+  const { todos, inputValue } = state;
 
   const inputRef = useRef(null);
 

@@ -3,6 +3,8 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import Todolist from "./components/Todolist/Todolist";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
 //auto complete
 function App() {
     //const [count, setCount] = useState(0);
@@ -14,7 +16,9 @@ function App() {
             {/* <EventDemo onClickButton={handleClick} /> */}
             {/* <Counter /> */}
             <h2>To-Do List</h2>
-            <Todolist />
+            <Provider store={store}>
+                <Todolist />
+            </Provider>
         </div>
     );
 }
