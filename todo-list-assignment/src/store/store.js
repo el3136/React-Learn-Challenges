@@ -89,23 +89,26 @@ function todoReducer(state = initialState, action) {
 // Middleware: Format ADD_TODO title
 const titleFormatterMiddleware = store => next => action => {
   if (action.type === "ADD_TODO") {
-    const timestamp = "Added at 2025-08-01:";
+    const date = new Date();
+    const timestamp = `Added at ${date}:`;
     action.payload = `${timestamp} ${store.getState().inputValue}`;
   }
   return next(action);
 };
 
 // Enhancer: Log time taken by reducer
-const monitorReducerEnhancer = createStore => (reducer, initialState) => {
-  const store = createStore((state, action) => {
-    const start = performance.now();
-    const result = reducer(state, action);
-    const end = performance.now();
-    console.log(`Action '${action.type}' processed in ${end - start}ms`);
-    return result;
-  }, initialState);
-  return store;
-};
+const monitorReducerEnhancer = (createStore) => {
+  return (reducer, initialState) => {
+    const store = createStore((state, action) => {
+      const start = performance.now();
+      const result = reducer(state, action);
+      const end = performance.now();
+      console.log(`Action '${action.type}' processed in ${end - start}ms`);
+      return result;
+    }, initialState);
+    return store;
+  };
+}
 
 // Store
 export const store = createStore(

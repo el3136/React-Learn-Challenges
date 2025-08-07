@@ -6,6 +6,8 @@ import { useTodos, useInputValue, useTodoDispatch } from '../../hooks/hooks';
 // For “add todo” action: Apply a middleware to modify the title to be this specific format: { title: "Added at 2025-08-01: Buy groceries" }
 // Apply a store enhancer to log the time it takes to process actions in the reducer
 
+// npm i react-redux redux
+
 // /src/store/store.js
 // /src/hooks/hooks.js
 // /src.App.jsx
