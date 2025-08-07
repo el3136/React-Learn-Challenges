@@ -98,17 +98,19 @@ const titleFormatterMiddleware = store => next => action => {
 
 // Enhancer: Log time taken by reducer
 const monitorReducerEnhancer = (createStore) => {
-  return (reducer, initialState) => {
-    const store = createStore((state, action) => {
+  return (reducer, initialState, enhancer) => {
+    const monitoredReducer = (state, action) => {
       const start = performance.now();
-      const result = reducer(state, action);
+      const newState = reducer(state, action);
       const end = performance.now();
-      console.log(`Action '${action.type}' processed in ${end - start}ms`);
-      return result;
-    }, initialState);
-    return store;
+      const diff = round(end - start);
+      console.log(`Action '${action.type}' processed in ${diff}ms`);
+      return newState;
+    };
+
+    return createStore(monitoredReducer, initialState, enhancer);
   };
-}
+};
 
 // Store
 export const store = createStore(
