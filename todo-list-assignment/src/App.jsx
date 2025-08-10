@@ -2,9 +2,11 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
-import Todolist from "./components/Todolist/Todolist";
+// import Todolist from "./components/Todolist/Todolist";
 import { Provider } from "react-redux";
-import { store } from "./store/store";
+import { store } from "./components/TodolistRTKThunk/todosRtkThunkStore";
+import Todolist from "./components/TodolistRTKThunk/TodolistRTKThunk";
+// import { store } from "./store/store";
 //auto complete
 function App() {
     //const [count, setCount] = useState(0);
